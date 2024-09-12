@@ -32,9 +32,8 @@ else
 fi
 exclude=${exclude:-"*.swp" "*.tmp" "printer-[0-9]*_[0-9]*.cfg" "*.bak" "*.bkp" "*.csv" "*.zip"}
 
-# Required for checking the use of the commit_message and debug parameter
+# Required for checking the use of the commit_message parameter
 commit_message_used=false
-debug_output=false
 
 # Check parameters
 while [[ $# -gt 0 ]]; do
@@ -58,7 +57,7 @@ while [[ $# -gt 0 ]]; do
       fi
       ;;
     -d|--debug)
-      debug_output=true
+      debug
       shift
       ;;
     *)
@@ -82,46 +81,12 @@ if [[ ! -v backupPaths ]]; then
     fi
 fi
 
-# Debug output: .env file with hidden token
-if [ "$debug_output" = true ]; then
-    begin_debug_line
-    while IFS= read -r line; do
-    if [[ $line == github_token=* ]]; then
-        echo "github_token=****************"
-    else
-        echo "$line"
-    fi
-    done < $HOME/klipper-backup/.env
-    end_debug_line
-fi
-
 # Check if backup folder exists, create one if it does not
 if [ ! -d "$backup_path" ]; then
     mkdir -p "$backup_path"
 fi
 
 cd "$backup_path"
-
-# Debug output: $HOME
-[ "$debug_output" = true ] && begin_debug_line && echo -e "\$HOME: $HOME" && end_debug_line
-
-# Debug output: $backup_path - (current) path and content
-[ "$debug_output" = true ] && begin_debug_line && echo -e "\$backup_path: $PWD" && echo -e "\nContent of \$backup_path:" && echo -ne "$(ls -la $backup_path)\n" && end_debug_line
-
-# Debug output: $backup_path/.git/config content
-if [ "$debug_output" = true ]; then
-    begin_debug_line
-    echo -e "\$backup_path/.git/config:\n"
-    while IFS= read -r line; do
-        if [[ $line == *"url ="*@* ]]; then
-            masked_line=$(echo "$line" | sed -E 's/(url = https:\/\/)[^@]*(@.*)/\1********\2/')
-            echo "$masked_line"
-        else
-            echo "$line"
-        fi
-    done < "$backup_path/.git/config"
-    end_debug_line
-fi
 
 # Check if .git exists else init git repo
 if [ ! -d ".git" ]; then
@@ -204,9 +169,6 @@ for path in "${backupPaths[@]}"; do
         done
     fi
 done
-
-# Debug output: $backup_path content after running rsync
-[ "$debug_output" = true ] && begin_debug_line && echo -e "Content of \$backup_path after rsync:" && echo -ne "$(ls -la $backup_path)\n" && end_debug_line
 
 cp "$parent_path"/.gitignore "$backup_path/.gitignore"
 
