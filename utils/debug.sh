@@ -10,8 +10,8 @@ parent_path=$(
 )
 
 # Initialize variables from .env file
-source "$parent_path"/.env
-source "$parent_path"/utils/utils.func
+source "$HOME/klipper-backup/.env"
+source "$HOME/klipper-backup/utils/utils.func
 
 # Check if .env is v1 version
 if [[ ! -v backupPaths ]]; then
