@@ -276,7 +276,11 @@ fix(){
     fi
     kill $loading_pid
     exit
+}
 
+debug(){
+    exec $parent_path/utils/debug.sh
+    exit
 }
 
 begin_debug_line(){
